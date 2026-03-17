@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: carbontrack_db
+    environment:
+      POSTGRES_DB: carbontrack
+      POSTGRES_USER: carbontrack
+      POSTGRES_PASSWORD: carbontrack
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U carbontrack"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: carbontrack_api
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/carbontrack
+      DB_USER: carbontrack
+      DB_PASSWORD: carbontrack
+      JWT_SECRET: carbontrack-secret-key-must-be-at-least-256-bits-long-for-hs256
+      JWT_EXPIRATION: 86400000
+      CORS_ORIGINS: http://localhost:3000
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/api-docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: carbontrack_web
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
