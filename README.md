@@ -1,17 +1,18 @@
 # CarbonTrack — Hackathon #26 Capgemini
 
-Application fullstack de calcul d'empreinte carbone pour sites physiques.
+Plateforme de suivi d'empreinte carbone pour sites physiques d'entreprise.
+Calcul automatique basé sur les facteurs d'émission ADEME 2023.
 
 ## Stack
 
-| Couche    | Technologie                |
-|-----------|----------------------------|
-| Frontend  | Next.js 14 + shadcn/ui + Tailwind CSS |
-| Mobile    | React Native (Expo)        |
-| Backend   | Java 21 + Spring Boot 3.2  |
-| BDD       | PostgreSQL 16              |
-| Auth      | JWT                        |
-| Migrations | Flyway                   |
+| Couche | Technologie |
+|--------|-------------|
+| Frontend | Next.js 16 + shadcn/ui + Tailwind CSS |
+| Mobile | React Native (Expo) |
+| Backend | Java 21 + Spring Boot 3.2 |
+| BDD | PostgreSQL 16 |
+| Auth | JWT |
+| Video | Remotion |
 
 ## Lancement rapide (Docker)
 
@@ -20,51 +21,68 @@ docker-compose up --build
 ```
 
 - Frontend : http://localhost:3000
-- Backend API : http://localhost:8080
-- Swagger UI : http://localhost:8080/swagger-ui.html
+- API : http://localhost:8080
+- Swagger : http://localhost:8080/swagger-ui.html
 
-**Compte démo :** `admin@capgemini.com` / `admin123`
+**Compte demo :** `admin@capgemini.com` / `admin123`
 
 ## Lancement local
 
-### Backend
+### 1. Base de donnees
+
+```bash
+docker run -d --name pg -e POSTGRES_DB=carbontrack -e POSTGRES_USER=carbontrack -e POSTGRES_PASSWORD=carbontrack -p 5432:5432 postgres:16-alpine
+```
+
+### 2. Backend
+
 ```bash
 cd backend
-# Démarrez PostgreSQL local (ou utilisez Docker)
-docker run -d --name pg -e POSTGRES_DB=carbontrack -e POSTGRES_USER=carbontrack -e POSTGRES_PASSWORD=carbontrack -p 5432:5432 postgres:16-alpine
-
 mvn spring-boot:run
 ```
 
-### Frontend
+API disponible sur http://localhost:8080
+
+### 3. Frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
-# → http://localhost:3000
 ```
 
-### Mobile
+Site disponible sur http://localhost:3000
+
+### 4. Mobile
+
 ```bash
 cd mobile
 npm install
 npx expo start
 ```
 
-## Calcul CO₂
+Scanner le QR code avec Expo Go (iOS/Android).
 
-| Source | Formule |
-|--------|---------|
-| Construction | Σ(quantité_kg × facteur_émission) |
-| Exploitation (annuel) | énergie_kWh × 0.0567 kgCO₂e/kWh |
-| Total (durée de vie) | Construction + Exploitation × 50 ans |
+## Video promotionnelle
 
-Facteurs ADEME Base Carbone 2023.
+```bash
+cd video
+npm install
+npx remotion studio    # preview dans le navigateur
+npx remotion render CarbonTrackPromo out/carbontrack-promo.mp4   # export MP4
+```
 
-## Données Capgemini Rennes (pré-chargées)
+## Documentation
 
-- Surface : 11 771 m²
-- Parking : 308 places
-- Énergie : 1 840 MWh/an
-- Employés : 1 800
-- Postes : 1 037
+- Documentation complete : [`docs/CarbonTrack_Documentation_Pro.pdf`](docs/CarbonTrack_Documentation_Pro%20(3).pdf)
+- Documentation technique : [`docs/DOCUMENTATION.md`](docs/DOCUMENTATION.md)
+
+## Structure du projet
+
+```
+backend/     API Spring Boot + Flyway migrations
+frontend/    Application web Next.js
+mobile/      Application mobile Expo/React Native
+video/       Video promotionnelle Remotion
+docs/        Documentation projet
+```
